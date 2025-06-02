@@ -3,20 +3,15 @@ var board = null;
 var game = new Chess(); // Létrehozzuk a Chess.js játék példányát
 
 // AI Beállítások
-// A nehézséget a Web Worker-nek küldjük el.
 var ai_depth = 2; // Alapértelmezett nehézség
-var ai_enabled = false; // AI kikapcsolva alapból
+var ai_enabled = true; // AI alapból BEKAPCSOLVA!
 
-// Sunfish Web Worker változó (az index.html-ben definiált)
-// Előfordulhat, hogy ez nem elérhető azonnal, ha a script.js hamarabb fut le.
-// Kérlek, győződj meg róla, hogy a script.js a Sunfish Worker után töltődik be az index.html-ben.
-// Az "if (window.sunfishWorker)" ellenőrzés segít, ha az index.html globális változóként hozta létre.
-var sunfishWorker; // deklaráljuk, hogy globális legyen, de az index.html fogja inicializálni
+// Sunfish Web Worker változó
+var sunfishWorker;
 
 // Várjuk meg, amíg a DOM teljesen betöltődik
 $(document).ready(function() {
     // A SunfishWorker az index.html-ben van inicializálva.
-    // Itt hivatkozunk rá, feltételezve, hogy globálisan elérhető.
     if (window.sunfishWorker) {
         sunfishWorker = window.sunfishWorker;
 
@@ -41,13 +36,17 @@ $(document).ready(function() {
                         board.position(game.fen());
                         if (game.game_over()) {
                             displayGameOver();
+                        } else {
+                            // Ha a játék még tart és az AI lépett, frissítjük a kijelzőt (opcionális)
+                            updateDifficultyDisplay();
                         }
                     } else {
                         console.error("AI érvénytelen lépést küldött: ", bestmove);
                     }
                 }
             } else if (message.startsWith("info")) {
-                console.log("AI info: ", message);
+                // Konzolra írjuk az AI info üzeneteit, ha szükséges
+                // console.log("AI info: ", message);
             }
         };
 
@@ -56,12 +55,34 @@ $(document).ready(function() {
         sunfishWorker.postMessage("isready");
         sunfishWorker.postMessage("ucinewgame");
 
-        console.log("AI kezdetben: " + (ai_enabled ? "bekapcsolva" : "kikapcsolva") + ", Nehézség: " + ai_depth);
+        console.log("AI alapból bekapcsolva, nehézség: " + ai_depth);
     } else {
         console.error("Sunfish Web Worker nem elérhető. Kérjük, ellenőrizze az index.html fájlt.");
     }
 
     board = Chessboard('board', config);
+
+    // Kezdetben frissítjük a nehézségi szint kijelzőjét
+    updateDifficultyDisplay();
+
+    // Eseménykezelők a gombokhoz
+    $('#increaseDifficulty').on('click', function() {
+        // AI könnyebb (nagyobb mélység)
+        ai_depth = Math.min(ai_depth + 1, 5); // Max 5-ös mélység (kerüljük a túl lassú számítást)
+        updateDifficultyDisplay();
+        alert('AI nehézség növelve: ' + ai_depth);
+    });
+
+    $('#decreaseDifficulty').on('click', function() {
+        // AI nehezebb (kisebb mélység)
+        ai_depth = Math.max(ai_depth - 1, 1); // Min 1-es mélység
+        updateDifficultyDisplay();
+        alert('AI nehézség csökkentve: ' + ai_depth);
+    });
+
+    $('#resetGame').on('click', function() {
+        resetGame();
+    });
 });
 
 // A lépések kezelése
@@ -87,6 +108,12 @@ function onDrop (source, target) {
 
   // Ha az AI be van kapcsolva és az ellenfél lépett (vagyis most az AI következik)
   if (ai_enabled && sunfishWorker) {
+    makeAiMove();
+  }
+}
+
+// Az AI lépésének kezdeményezése
+function makeAiMove() {
     // Elküldjük az AI-nak az aktuális pozíciót
     // UCI "position startpos moves ..." formátum
     var moves_history = game.history({ verbose: true });
@@ -95,8 +122,8 @@ function onDrop (source, target) {
     
     // Elküldjük a "go depth X" parancsot, ahol X az ai_depth
     sunfishWorker.postMessage("go depth " + ai_depth);
-  }
 }
+
 
 // Játék vége üzenet megjelenítése
 function displayGameOver() {
@@ -121,41 +148,9 @@ var config = {
 // ---------- Diszkrécióhoz kapcsolódó funkciók és AI vezérlés ----------
 
 document.addEventListener('keydown', function(event) {
-    // Diszkréciós billentyű
+    // Diszkréciós billentyű (Ctrl + Alt + S)
     if (event.ctrlKey && event.altKey && event.key === 's') {
-        const boardElement = document.getElementById('board');
-        if (boardElement.classList.contains('hidden-board')) {
-            boardElement.classList.remove('hidden-board');
-            boardElement.classList.add('small-board');
-        } else {
-            boardElement.classList.add('hidden-board');
-            boardElement.classList.remove('small-board');
-        }
-        event.preventDefault();
-    }
-    // Gyorsbillentyű az AI be-/kikapcsolására (pl. Ctrl + Alt + A)
-    if (event.ctrlKey && event.altKey && event.key === 'a') {
-        ai_enabled = !ai_enabled;
-        alert('AI ' + (ai_enabled ? 'bekapcsolva' : 'kikapcsolva') + ', Aktuális nehézség: ' + ai_depth);
-        // Ha az AI bekapcsolódik és épp az ő köre van (fekete), akkor lép
-        if (ai_enabled && game.turn() === 'b' && sunfishWorker) { // Feltételezzük, hogy az AI a fekete
-            var moves_history = game.history({ verbose: true });
-            var uci_moves = moves_history.map(m => m.from + m.to + (m.promotion || '')).join(' ');
-            sunfishWorker.postMessage("position startpos moves " + uci_moves);
-            sunfishWorker.postMessage("go depth " + ai_depth);
-        }
-        event.preventDefault();
-    }
-    // Gyorsbillentyű a nehézség növelésére (pl. Ctrl + Alt + ArrowUp)
-    if (event.ctrlKey && event.altKey && event.key === 'ArrowUp') {
-        ai_depth = Math.min(ai_depth + 1, 5); // Max 5-ös mélység (kerüljük a túl lassú számítást)
-        alert('AI nehézség növelve: ' + ai_depth);
-        event.preventDefault();
-    }
-    // Gyorsbillentyű a nehézség csökkentésére (pl. Ctrl + Alt + ArrowDown)
-    if (event.ctrlKey && event.altKey && event.key === 'ArrowDown') {
-        ai_depth = Math.max(ai_depth - 1, 1); // Min 1-es mélység
-        alert('AI nehézség csökkentve: ' + ai_depth);
+        toggleBoardVisibility();
         event.preventDefault();
     }
 });
@@ -171,14 +166,20 @@ function toggleBoardVisibility() {
     }
 }
 
+// Frissíti a nehézségi szint kijelzőjét
+function updateDifficultyDisplay() {
+    $('#ai-difficulty-display').text(ai_depth);
+}
+
 // A játék újraindítása
 function resetGame() {
     game.reset();
     board.position('start');
-    ai_enabled = false; // AI kikapcsolása újraindításkor
+    // AI már alapból bekapcsolva van, csak a nehézséget állítjuk vissza
     ai_depth = 2; // Nehézség alaphelyzetbe állítása
+    updateDifficultyDisplay(); // Frissítjük a kijelzőt
     if (sunfishWorker) {
         sunfishWorker.postMessage("ucinewgame"); // Értesítjük az AI-t is
     }
-    console.log("Játék újraindítva. AI kikapcsolva, nehézség alaphelyzetben.");
+    console.log("Játék újraindítva. AI bekapcsolva, nehézség alaphelyzetben.");
 }
