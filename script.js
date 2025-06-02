@@ -11,7 +11,7 @@ var sunfishWorker;
 
 // Játék vége üzenet megjelenítése
 function displayGameOver() {
-    alert('Játék vége! ' + (game.in_checkmate() ? 'Sakk-matt!' : 'Döntetlen.');
+    alert('Játék vége! ' + (game.in_checkmate() ? 'Sakk-matt!' : 'Döntetlen.'));
 }
 
 // A bábu mozgatásának animációja utáni esemény
