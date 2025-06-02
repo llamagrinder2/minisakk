@@ -1,0 +1,64 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center; /* Középre igazítás */
+    align-items: center;    /* Középre igazítás */
+    min-height: 100vh;      /* Teljes képernyőmagasság */
+    background-color: #f0f0f0; /* Világos háttér */
+    overflow: hidden; /* Ne legyen görgetősáv */
+}
+
+/* Ez a fő konténer, ami a táblát tartalmazza */
+#board {
+    width: 250px; /* Az alapméret, ezt fogjuk kicsire venni */
+    height: 250px; /* Ez a Chessboard.js-nek kell a négyzet alakhoz */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Kis árnyék, hogy ne legyen lapos */
+}
+
+/* CSS a még kisebb, "feltűnésmentes" mérethez */
+.small-board {
+    width: 150px !important; /* Még kisebb méret, !important felülírja a chessboard.js-t */
+    height: 150px !important;
+    font-size: 8px; /* A koordináták mérete */
+}
+
+/* A tábla celláinak finomhangolása */
+.square-55d63 {
+    font-size: 8px; /* A cellában lévő jelölések (ha vannak) */
+}
+
+/* A bábuk képének méreteit is a CSS-nek kell skáláznia, ha nem illeszkednek */
+.piece-417db {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Ha a böngésző ablaka túl nagy, a tábla még mindig kicsi maradjon */
+@media (min-width: 300px) {
+    body {
+        background-color: #f0f0f0; /* Maradjon a világos háttér */
+    }
+}
+
+/* Elrejtett, de könnyen megjeleníthető állapot */
+.hidden-board {
+    opacity: 0;
+    pointer-events: none; /* Ne lehessen rákattintani, ha rejtett */
+    position: absolute; /* Rejtett állapotban ne foglaljon helyet */
+    left: -9999px; /* Eltoljuk a képernyőről */
+}
+
+/* Hozzáadhatunk egy gombot/linket az újraindításhoz, de most csak alap */
+#restart-button {
+    display: none; /* Kezdetben rejtve */
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
