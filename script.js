@@ -20,6 +20,7 @@ $(document).ready(function() {
             var message = event.data;
             if (message.startsWith("bestmove")) {
                 var bestmove = message.split(" ")[1];
+                    console.log("AI returned bestmove: ", bestmove);
                 if (bestmove && bestmove !== "(none)") {
                     // UCI formátumú lépés (pl. e2e4, g1f3, e7e8q) átalakítása Chess.js formátumra
                     var source = bestmove.substring(0, 2);
