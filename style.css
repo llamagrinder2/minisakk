@@ -33,6 +33,7 @@ body {
 .piece-417db {
     width: 100% !important;
     height: 100% !important;
+    background-size: 100% 100% !important; /* Ez fontos lehet, ha a képek nem skálázódnak rendesen */
 }
 
 /* Ha a böngésző ablaka túl nagy, a tábla még mindig kicsi maradjon */
