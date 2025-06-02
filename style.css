@@ -3,6 +3,7 @@ body {
     padding: 0;
     font-family: sans-serif;
     display: flex;
+    flex-direction: column; /* Ezt módosítottam, hogy a tábla és a gombok egymás alá kerüljenek */
     justify-content: center; /* Középre igazítás */
     align-items: center;    /* Középre igazítás */
     min-height: 100vh;      /* Teljes képernyőmagasság */
@@ -15,6 +16,7 @@ body {
     width: 250px; /* Az alapméret, ezt fogjuk kicsire venni */
     height: 250px; /* Ez a Chessboard.js-nek kell a négyzet alakhoz */
     box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Kis árnyék, hogy ne legyen lapos */
+    margin-bottom: 20px; /* Hely a gomboknak */
 }
 
 /* CSS a még kisebb, "feltűnésmentes" mérethez */
@@ -52,8 +54,9 @@ body {
 }
 
 /* Hozzáadhatunk egy gombot/linket az újraindításhoz, de most csak alap */
-#restart-button {
-    display: none; /* Kezdetben rejtve */
+#restart-button { /* Ezt a gombot átneveztem #resetGame-re az index.html-ben, ha használnánk.
+                    A kódban most #resetGame-re hivatkozunk.*/
+    display: none; /* Kezdetben rejtve, ha nem használnánk külön */
     margin-top: 10px;
     padding: 5px 10px;
     background-color: #4CAF50;
@@ -62,4 +65,32 @@ body {
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
+}
+
+/* ÚJ STÍLUSOK A VEZÉRLŐGOMBOKHOZ */
+.controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.controls button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    background-color: #4CAF50; /* Zöld szín */
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.controls button:hover {
+    background-color: #45a049;
+}
+
+.controls p {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
