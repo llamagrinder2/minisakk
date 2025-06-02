@@ -16,6 +16,7 @@ function onDrop (source, target) {
 
   // Játék vége ellenőrzése
   if (game.game_over()) {
+    // Alert helyett ide írhatnánk valami diszkrétebb üzenetet a tábla alá
     alert('Játék vége! ' + (game.in_checkmate() ? 'Sakk-matt!' : 'Döntetlen.'));
     // Itt lehetne újraindító gombot megjeleníteni, vagy automatikusan újraindítani
   }
@@ -31,7 +32,9 @@ var config = {
   draggable: true, // Lehet-e húzni a bábukat
   position: 'start', // Kezdő pozíció
   onDrop: onDrop, // Ha eldobnak egy bábut
-  onSnapEnd: onSnapEnd // Ha befejeződik a snapback animáció (a bábu "helyre pattan")
+  onSnapEnd: onSnapEnd, // Ha befejeződik a snapback animáció (a bábu "helyre pattan")
+  // EZ AZ ÚJ SOR: Itt adjuk meg, hol találja a bábuk képeit
+  pieceTheme: 'img/{piece}.png' // Ez megmondja, hogy az 'img' mappában keresse a "{piece}.png" nevű fájlokat
 };
 
 // A tábla inicializálása, ha a DOM készen áll
@@ -62,7 +65,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// A tábla elrejtése/megjelenítése egy gombnyomásra (ha hozzáadnál egy gombot)
+// A tábla elrejtése/megjelenítése egy gombnyomásra (ha hozzáadnánk egy gombot)
 function toggleBoardVisibility() {
     const boardElement = document.getElementById('board');
     if (boardElement.classList.contains('hidden-board')) {
