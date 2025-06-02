@@ -11,19 +11,23 @@
 
     <div id="board" class="small-board"></div>
 
+    <div class="controls">
+        <p>AI Nehézség: <span id="ai-difficulty-display">2</span></p>
+        <button id="decreaseDifficulty">Nehezebb AI</button>
+        <button id="increaseDifficulty">Könnyebb AI</button>
+        <button id="resetGame">Új játék</button>
+    </div>
+
     <script src="lib/jquery-3.7.1.min.js"></script>
     <script src="lib/chessboard-1.0.0.min.js"></script>
     <script src="lib/chess.min.js"></script>
     
     <script>
-        // Ellenőrizzük, hogy a böngésző támogatja-e a Web Workereket
         if (window.Worker) {
-            // Létrehozzuk a Web Workert a Sunfish.js fájlból
             var sunfishWorker = new Worker('lib/Sunfish.js');
             console.log("Sunfish Web Worker indítva.");
         } else {
             console.error("A böngésző nem támogatja a Web Workereket. Az AI funkciók nem lesznek elérhetők.");
-            // Kezelheted ezt az esetet, például kikapcsolhatod az AI-t
         }
     </script>
 
