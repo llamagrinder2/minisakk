@@ -24,7 +24,7 @@
     
     <script>
         if (window.Worker) {
-            var sunfishWorker = new Worker('lib/Sunfish.js');
+            var sunfishWorker = new Worker('lib/sunfish.js');
             console.log("Sunfish Web Worker indítva.");
         } else {
             console.error("A böngésző nem támogatja a Web Workereket. Az AI funkciók nem lesznek elérhetők.");
