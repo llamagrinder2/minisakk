@@ -1,4 +1,4 @@
-// Globális változók a játék állapotához és a táblához asdasd
+// Globális változók a játék állapotához és a táblához
 var board = null;
 var game = new Chess(); // Létrehozzuk a Chess.js játék példányát
 
@@ -6,8 +6,8 @@ var game = new Chess(); // Létrehozzuk a Chess.js játék példányát
 var ai_depth = 2; // Alapértelmezett nehézség
 var ai_enabled = true; // AI alapból BEKAPCSOLVA!
 
-// Sunfish Web Worker változó
-var sunfishWorker;
+// Sunfish Web Worker változó (az index.html-ben deklaráljuk globálisan a window.sunfishWorker-ként)
+// var sunfishWorker; // EZT A SORT KOMMENTELD KI VAGY TÖRÖLD!
 
 // ÚJ VÁLTOZÓK A KATTINTÁSOS LÉPÉSHEZ
 var selectedSquare = null; // Tárolja az aktuálisan kijelölt mezőt
@@ -24,7 +24,7 @@ function displayGameOver() {
 function removeHighlights() {
     $('#board .square-55d63').removeClass(HIGHLIGHT_CLASS);
     $('#board .square-55d63').removeClass('highlight-square'); // A kijelölt bábu mezőjének kiemelését is törli
-    // selectedSquare = null; // Ezt az onSquareClick kezeli intelligensen
+    // selectedSquare = null; // Ezt az onSquareClick kezeli intelligensen, nem kell itt törölni
 }
 
 // ÚJ FÜGGVÉNY: Kiemeli a lehetséges lépéseket
@@ -65,7 +65,7 @@ function onSquareClick(square) {
             // Ellenőrizzük, vége van-e a játéknak
             if (game.game_over()) {
                 displayGameOver();
-            } else if (ai_enabled && sunfishWorker) {
+            } else if (ai_enabled && window.sunfishWorker) { // Itt window.sunfishWorker-t használunk
                 makeAiMove(); // Ha AI, AI lép
             }
         } else {
@@ -119,39 +119,36 @@ function onDrop(source, target) {
         return;
     }
 
-    if (ai_enabled && sunfishWorker) {
+    if (ai_enabled && window.sunfishWorker) { // Itt is window.sunfishWorker-t használunk
         console.log("onDrop: AI makeAiMove() hívás feltétel teljesült.");
         makeAiMove();
     } else {
-        console.log("onDrop: AI feltétel NEM teljesült. ai_enabled:", ai_enabled, " sunfishWorker:", sunfishWorker);
+        console.log("onDrop: AI feltétel NEM teljesült. ai_enabled:", ai_enabled, " sunfishWorker:", window.sunfishWorker);
     }
 }
 
 // A chessboard.js konfigurációja
 var config = {
-    draggable: true, // Lehet-e húzni a bábukat (ezt meghagyjuk)
+    draggable: true, // Lehet-e húzni a bábukat
     position: 'start', // Kezdő pozíció
     onDrop: onDrop, // Ha eldobnak egy bábut
     onSnapEnd: function() {
-        // A Chessboard.js visszahívása, amikor egy bábu mozgás animációja befejeződik
-        // Itt általában a board.position(game.fen()) hívást szokták elhelyezni,
-        // de az onDrop vagy onSquareClick már frissíti a táblát, így itt nem feltétlen szükséges.
+        // Ezt a Chessboard.js visszahívását nem használjuk aktívan, de lehet hagyni.
     },
-    onSquareClick: onSquareClick, // ÚJ: Kezeli a mezőre kattintásokat
+    // onSquareClick: onSquareClick, // *** EZT A SORT TÖRÖLD VAGY KOMMENTELD KI! ***
     pieceTheme: 'img/{piece}.png'
 };
 
 
 // Várjuk meg, amíg a DOM teljesen betöltődik
 $(document).ready(function() {
-    // Web Worker inicializálása
-    // Ellenőrizni kell, hogy létezik-e window.Worker (Web Worker támogatás)
-    if (window.Worker) {
-        // Itt a sunfish.js fájlnév kisbetűsre javítva, ahogy korábban megbeszéltük
-        sunfishWorker = new Worker('lib/sunfish.js');
-        console.log("Sunfish Web Worker indítva.");
-
-        sunfishWorker.onmessage = function(event) {
+    // Web Worker inicializálása - MOST MÁR A WINDOW.SUNFISHWORKER LESZ ELÉRHETŐ AZ INDEX.HTML-BŐL
+    if (window.sunfishWorker) { // Itt window.sunfishWorker-t használunk
+        // A worker onmessage, onerror, és postMessage hívásait áthelyezzük ide
+        // mert a script.js fogja kezelni, és a window.sunfishWorker már létezik
+        // ha az index.html scriptje lefutott.
+        
+        window.sunfishWorker.onmessage = function(event) {
             var message = event.data;
             if (message.startsWith("bestmove")) {
                 var bestmove = message.split(" ")[1];
@@ -181,21 +178,29 @@ $(document).ready(function() {
             }
         };
 
-        sunfishWorker.onerror = function(error) {
+        window.sunfishWorker.onerror = function(error) {
             console.error("Sunfish Web Worker hiba: ", error);
         };
 
-        sunfishWorker.postMessage("uci");
-        sunfishWorker.postMessage("isready");
-        sunfishWorker.postMessage("ucinewgame");
+        window.sunfishWorker.postMessage("uci");
+        window.sunfishWorker.postMessage("isready");
+        window.sunfishWorker.postMessage("ucinewgame");
 
         console.log("AI alapból bekapcsolva, nehézség: " + ai_depth);
     } else {
-        console.error("A böngésző nem támogatja a Web Workereket, vagy a Sunfish Web Worker nem elérhető.");
+        console.error("A Sunfish Web Worker nem elérhető. Kérjük, ellenőrizze az index.html fájlt és a Web Worker támogatást.");
     }
 
     // Tábla inicializálása
     board = Chessboard('board', config);
+
+    // *** EZ AZ ÚJ KÓD A KLIKK ESEMÉNYKEZELŐHÖZ: ***
+    // Hozzáadjuk a kattintás eseményfigyelőt a tábla minden mezőjéhez
+    $('#board').on('click', '.square-55d63', function() {
+        var square = $(this).attr('data-square'); // Lekérdezzük a mezőhöz tartozó koordinátát (pl. "e2")
+        onSquareClick(square); // Meghívjuk a saját onSquareClick függvényünket ezzel a koordinátával
+    });
+    // ********************************************
 
     // Nehézség kijelző frissítése
     updateDifficultyDisplay();
@@ -223,10 +228,10 @@ function makeAiMove() {
     var moves_history = game.history({ verbose: true });
     var uci_moves = moves_history.map(m => m.from + m.to + (m.promotion || '')).join(' ');
     console.log("Sending to AI: position startpos moves " + uci_moves);
-    sunfishWorker.postMessage("position startpos moves " + uci_moves);
-    
+    window.sunfishWorker.postMessage("position startpos moves " + uci_moves); // window.sunfishWorker
+
     console.log("Sending to AI: go depth " + ai_depth);
-    sunfishWorker.postMessage("go depth " + ai_depth);
+    window.sunfishWorker.postMessage("go depth " + ai_depth); // window.sunfishWorker
 }
 
 // Tábla láthatóságának váltása (Ctrl+Alt+S)
@@ -239,7 +244,6 @@ document.addEventListener('keydown', function(event) {
 
 function toggleBoardVisibility() {
     const boardElement = document.getElementById('board');
-    // Itt a 'small-board' osztályt használjuk, hogy visszatérjünk a normál kis mérethez, ha látható
     if (boardElement.classList.contains('hidden-board')) {
         boardElement.classList.remove('hidden-board');
         boardElement.classList.add('small-board'); // Alapértelmezett "kis" méret
@@ -260,8 +264,8 @@ function resetGame() {
     board.position('start');
     ai_depth = 2; // AI nehézség visszaállítása az alapértelmezettre
     updateDifficultyDisplay();
-    if (sunfishWorker) {
-        sunfishWorker.postMessage("ucinewgame"); // Értesítjük az AI-t az új játékról
+    if (window.sunfishWorker) { // window.sunfishWorker
+        window.sunfishWorker.postMessage("ucinewgame"); // Értesítjük az AI-t az új játékról
     }
     console.log("Játék újraindítva. AI bekapcsolva, nehézség alaphelyzetben.");
     removeHighlights(); // Resetnél is töröljük a kijelöléseket
