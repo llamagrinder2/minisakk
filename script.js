@@ -1,4 +1,4 @@
-// Globális változók a játék állapotához és a táblához
+// Globális változók a játék állapotához és a táblához asdasd
 var board = null;
 var game = new Chess(); // Létrehozzuk a Chess.js játék példányát
 
