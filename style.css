@@ -1,22 +1,28 @@
+/* Általános alapstílusok */
 body {
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
+    font-family: Arial, sans-serif; /* Általánosabb, tiszta betűtípus */
     display: flex;
-    flex-direction: column; /* Ezt módosítottam, hogy a tábla és a gombok egymás alá kerüljenek */
-    justify-content: center; /* Középre igazítás */
-    align-items: center;    /* Középre igazítás */
+    flex-direction: column; /* A tábla és a gombok egymás alá kerüljenek */
+    justify-content: center; /* Függőlegesen középre igazítás */
+    align-items: center;    /* Vízszintesen középre igazítás */
     min-height: 100vh;      /* Teljes képernyőmagasság */
-    background-color: #f0f0f0; /* Világos háttér */
+    background-color: #2e2e2e; /* SÖTÉT HÁTTÉR, a referenciaképhez igazítva */
+    color: #e0e0e0; /* Világos szövegszín a sötét háttéren */
     overflow: hidden; /* Ne legyen görgetősáv */
 }
 
 /* Ez a fő konténer, ami a táblát tartalmazza */
 #board {
-    width: 250px; /* Az alapméret, ezt fogjuk kicsire venni */
-    height: 250px; /* Ez a Chessboard.js-nek kell a négyzet alakhoz */
-    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Kis árnyék, hogy ne legyen lapos */
+    width: 250px; /* Alapméret (ez az "eredeti" kicsi méret) */
+    height: 250px; /* Chessboard.js-nek kell a négyzet alakhoz */
+    /* Box-shadow diszkrétebbé tétele, hogy ne legyen túl feltűnő */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); /* Enyhe, sötétebb árnyék */
     margin-bottom: 20px; /* Hely a gomboknak */
+    border-radius: 5px; /* Lekerekített sarkok, hogy lágyabb legyen */
+    /* Hozzáadtam egy vékony, diszkrét keretet */
+    border: 1px solid #4a4a4a;
 }
 
 /* CSS a még kisebb, "feltűnésmentes" mérethez */
@@ -24,11 +30,15 @@ body {
     width: 150px !important; /* Még kisebb méret, !important felülírja a chessboard.js-t */
     height: 150px !important;
     font-size: 8px; /* A koordináták mérete */
+    /* A small-board is kapjon diszkrét árnyékot és keretet */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid #3a3a3a;
 }
 
 /* A tábla celláinak finomhangolása */
 .square-55d63 {
     font-size: 8px; /* A cellában lévő jelölések (ha vannak) */
+    color: rgba(224, 224, 224, 0.6); /* Koordináták színe, enyhén áttetsző */
 }
 
 /* A bábuk képének méreteit is a CSS-nek kell skáláznia, ha nem illeszkednek */
@@ -38,10 +48,35 @@ body {
     background-size: 100% 100% !important; /* Ez fontos lehet, ha a képek nem skálázódnak rendesen */
 }
 
-/* Ha a böngésző ablaka túl nagy, a tábla még mindig kicsi maradjon */
+/* Chessboard.js alapértelmezett színeinek felülírása a sötét témához */
+.board-white {
+    background-color: #5a5a5a; /* SÖTÉT SZÜRKE a világos mezőkhöz */
+}
+
+.board-black {
+    background-color: #424242; /* MÉG SÖTÉTEBB SZÜRKE a sötét mezőkhöz */
+}
+
+/* Kiemelések a jobb felhasználói élményért (ha a script.js ezeket használja) */
+.highlight-square {
+    /* Amikor egy bábu kijelölésre kerül */
+    box-shadow: inset 0 0 8px 8px rgba(100, 255, 100, 0.4); /* Diszkrét zöldes ragyogás */
+}
+
+/* Az utolsó lépés kiemelése (ha a script.js hozzáadja ezt az osztályt) */
+.last-move-light {
+    background-color: rgba(140, 140, 0, 0.3); /* Félátlátszó barnás/sárgás, diszkrét árnyalat */
+}
+
+.last-move-dark {
+    background-color: rgba(100, 100, 0, 0.3); /* Félátlátszó barnás/sárgás, diszkrét árnyalat */
+}
+
+
+/* @media szabályt módosítva a sötét háttér megtartására */
 @media (min-width: 300px) {
     body {
-        background-color: #f0f0f0; /* Maradjon a világos háttér */
+        background-color: #2e2e2e; /* MARADJON A SÖTÉT HÁTTÉR */
     }
 }
 
@@ -53,44 +88,56 @@ body {
     left: -9999px; /* Eltoljuk a képernyőről */
 }
 
-/* Hozzáadhatunk egy gombot/linket az újraindításhoz, de most csak alap */
-#restart-button { /* Ezt a gombot átneveztem #resetGame-re az index.html-ben, ha használnánk.
-                    A kódban most #resetGame-re hivatkozunk.*/
-    display: none; /* Kezdetben rejtve, ha nem használnánk külön */
-    margin-top: 10px;
-    padding: 5px 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-/* ÚJ STÍLUSOK A VEZÉRLŐGOMBOKHOZ */
+/* UI vezérlőgombok és szövegek stílusai */
 .controls {
     text-align: center;
     margin-top: 20px;
+    padding: 10px;
+    background-color: #3a3a3a; /* Sötétebb háttér a vezérlőknek */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .controls button {
-    padding: 10px 15px;
-    margin: 5px;
+    padding: 10px 18px; /* Kicsit nagyobb gombok */
+    margin: 8px; /* Nagyobb margó a gombok között */
     border: none;
-    background-color: #4CAF50; /* Zöld szín */
-    color: white;
+    background-color: #555555; /* Sötétebb szürke gomb háttér */
+    color: #e0e0e0; /* Világos szöveg a gombokon */
     font-size: 16px;
     cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease; /* Átmenet és enyhe "lenyomás" effekt */
 }
 
 .controls button:hover {
-    background-color: #45a049;
+    background-color: #6a6a6a; /* Világosabb szürke hover állapotban */
+    transform: translateY(-2px); /* Enyhe "lebegés" effekt */
+}
+
+.controls button:active {
+    background-color: #4a4a4a; /* Még sötétebb lenyomáskor */
+    transform: translateY(0);
 }
 
 .controls p {
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;
+    color: #e0e0e0; /* Világos szövegszín */
+}
+
+/* A "restart-button" vagy "resetGame" gomb, ha külön stílust kap */
+#resetGame { /* A script.js-ben használt ID */
+    /* A controls button stílusait örökli, de ha kell, itt felülírható */
+    /* pl: background-color: #c0392b; /* Piros reset gomb */ */
+    /* Esetleg kicsit feltűnőbb reset gomb, ha a felhasználó észrevenné */
+}
+
+/* Egyéb elemek, ha vannak */
+.game-status {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #e0e0e0;
 }
